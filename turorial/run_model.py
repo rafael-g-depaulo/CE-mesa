@@ -1,4 +1,6 @@
 from money_model import MoneyModel
 
-empty_model = MoneyModel(13)
-empty_model.step()
+model = MoneyModel(5)
+
+for i in range(10):
+  model.step()
