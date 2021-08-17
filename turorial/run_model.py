@@ -1,30 +1,32 @@
-from money_model import MoneyModel
+from money_model import MoneyModel, compute_gini
+
+from mesa.batchrunner import BatchRunner
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-# num_models = 1
-num_agents = 50
-num_steps = 20
+fixed_params = {
+  "width": 10,
+  "height": 10
+}
 
-grid_width = 10
-grid_height = 10
+variable_params = {
+  "N": range(10, 500, 10)
+}
 
-# Run the model
-model = MoneyModel(num_agents, grid_width, grid_height)
-for i in range(num_steps):
-  model.step()
+batch_run = BatchRunner(
+  MoneyModel,
+  variable_params,
+  fixed_params,
+  iterations=5,
+  max_steps=100,
+  model_reporters={"Gini": compute_gini}
+)
 
-agent_counts = np.zeros((model.grid.width, model.grid.height))
-for cell in model.grid.coord_iter():
-  cell_content, x, y = cell
-  agent_count = len(cell_content)
-  agent_counts[x][y] = agent_count
+batch_run.run_all()
 
-# plt.imshow(agent_counts, interpolation='nearest')
-# plt.colorbar()
-
-gini = model.datacollector.get_model_vars_dataframe()
-gini.plot()
+run_data = batch_run.get_model_vars_dataframe()
+run_data.head()
+plt.scatter(run_data.N, run_data.Gini)
 
 plt.show()
